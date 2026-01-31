@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Forever Valentine ❤️</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@300;500;700&display=swap');
+
+        :root {
+            --off-white: #fffafa;
+            --pink: #ffdae0;
+            --red: #ff4d6d;
+            --text: #590d22;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--off-white);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* --- EASY GAME: THE HEART TAP --- */
+        #game-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--off-white);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tap-heart {
+            font-size: 100px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            filter: drop-shadow(0 10px 15px rgba(255, 77, 109, 0.3));
+        }
+
+        .progress-bar {
+            width: 250px;
+            height: 12px;
+            background: #eee;
+            border-radius: 10px;
+            margin-top: 40px;
+            border: 2px solid var(--pink);
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--pink), var(--red));
+            transition: width 0.3s;
+        }
+
+        /* --- REVEALED PAGE --- */
+        #main-page {
+            display: none;
+            opacity: 0;
+            height: 100%;
+            overflow-y: auto;
+            transition: opacity 1.5s;
+            background: var(--off-white);
+            padding-bottom: 50px;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 20px;
+            background: linear-gradient(to bottom, #ffeef1, var(--off-white));
+        }
+
+        h1 { font-family: 'Dancing Script', cursive; font-size: 3.5rem; color: var(--red); margin: 0; }
+
+        .anniversary-timer {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(255, 77, 109, 0.1);
+            margin: 20px auto;
+            display: table;
+            font-weight: 700;
+            border: 2px solid var(--pink);
+            color: var(--red);
+        }
+
+        /* --- DECORATIVE SQUARE FRAME --- */
+        .photo-center {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 40px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+
+        .deco { position: absolute; font-size: 40px; z-index: 10; }
+        .deco-tl { top: -20px; left: -20px; }
+        .deco-tr { top: -20px; right: -20px; }
+        .deco-bl { bottom: -20px; left: -20px; }
+        .deco-br { bottom: -20px; right: -20px; }
+
+        .swiper { width: 100%; height: 100%; border-radius: 10px; }
+        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- SWEET PARAGRAPHS --- */
+        .letter-wrap { width: 90%; max-width: 400px; margin: 0 auto; }
+        .para-card {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 25px;
+            line-height: 1.8;
+            border-left: 6px solid var(--red);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+        }
+        .para-card h3 { font-family: 'Dancing Script', cursive; font-size: 2rem; margin-top: 0; color: var(--red); }
+
+        /* --- FLOATING ELEMENTS --- */
+        .float-obj {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            top: -50px;
+            animation: driftDown linear forwards;
+        }
+        @keyframes driftDown { to { transform: translateY(110vh) rotate(360deg); } }
+
+        .music-btn {
+            position: fixed; bottom: 25px; right: 25px;
+            background: white; border: 2px solid var(--pink);
+            width: 55px; height: 55px; border-radius: 50%; z-index: 1000;
+            font-size: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-screen">
+        <h2 style="font-family: 'Dancing Script'; font-size: 2.2rem; margin-bottom: 10px;">How much do you love me?</h2>
+        <p style="font-weight: 300; margin-bottom: 30px;">Tap the heart to show me! ❤️</p>
+        
+        <div class="tap-heart" id="big-heart" onclick="handleTap()">❤️</div>
+        
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <p id="tap-count" style="margin-top: 15px; font-weight: bold; color: var(--red);">Love Meter: 0%</p>
+    </div>
+
+    <div id="main-page">
+        <header>
+            <h1>My Beautiful Queen</h1>
+            <p style="font-weight: 700; color: var(--red); letter-spacing: 2px; font-size: 1.2rem;">LOVE YOU..</p>
+        </header>
+
+        <div class="anniversary-timer" id="timer" data-start="2025-08-03T00:00:00">0 Days 00:00:00 — Since 2025-08-03</div>
+
+        <div class="photo-center">
+            <div class="deco deco-tl">🎀</div>
+            <div class="deco deco-tr">🌹</div>
+            <div class="deco deco-bl">🌸</div>
+            <div class="deco deco-br">💖</div>
+            
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide"><img src="pics/photo1.jpeg"></div>
+                    <div class="swiper-slide"><img src="pics/photo2.jpeg"></div>
+                    <div class="swiper-slide"><img src="pics/photo3.jpeg"></div>
+                    <div class="swiper-slide"><img src="pics/photo4.jpeg"></div>
+                    <div class="swiper-slide"><img src="pics/photo5.jpeg"></div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+
+        <div class="letter-wrap">
+            <div class="para-card">
+                <h3>My Whole World...</h3>
+                Every single day I wake up feeling like the luckiest person because I have you. You aren't just my girlfriend; you are my best friend, my soulmate, and my peace.
+            </div>
+
+            <div class="para-card">
+                <h3>Our Beautiful Journey</h3>
+                Seeing these photos makes my heart so full. Every laugh we've shared and every challenge we've overcome has only made our bond stronger. I cherish every second with you.
+            </div>
+
+            <div class="para-card">
+                <h3>To Forever...</h3>
+                I promise to keep loving you, protecting you, and choosing you every single day.<br> LOVE YOU NEERUSE... FOREVER.
+                <br><br>
+                <div style="text-align: center; font-size: 2.5rem;">❤️✨🤍</div>
+            </div>
+        </div>
+
+        <footer style="text-align: center; font-family: 'Dancing Script'; font-size: 2rem; padding: 40px 0; color: var(--red);">
+            Forever & Always Yours
+        </footer>
+    </div>
+
+    <button class="music-btn" onclick="toggleMusic()">🎵</button>
+    <audio id="bg-music" loop><source src="pics/s.mp3.mpeg" type="audio/mpeg"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        let taps = 0;
+        const heart = document.getElementById('big-heart');
+        const fill = document.getElementById('progress-fill');
+        const countText = document.getElementById('tap-count');
+
+        function handleTap() {
+            taps++;
+            let scale = 1 + (taps * 0.1);
+            heart.style.transform = `scale(${scale})`;
+            
+            let percent = taps * 10;
+            fill.style.width = percent + '%';
+            countText.innerText = `Love Meter: ${percent}%`;
+
+            if (taps >= 10) {
+                // EXPLOSIVE REVEAL
+                confetti({
+                    particleCount: 250,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ff4d6d', '#ffffff', '#ffccd5']
+                });
+
+                document.getElementById('game-screen').style.transform = 'scale(2)';
+                document.getElementById('game-screen').style.opacity = '0';
+                
+                setTimeout(() => {
+                    document.getElementById('game-screen').style.display = 'none';
+                    document.getElementById('main-page').style.display = 'block';
+                    setTimeout(() => { document.getElementById('main-page').style.opacity = '1'; }, 50);
+                    document.getElementById('bg-music').play();
+                    initTimer();
+                    startFloating();
+                }, 800);
+            }
+        }
+
+        const swiper = new Swiper('.swiper', {
+            effect: 'fade',
+            loop: true,
+            autoplay: { delay: 3000 },
+            pagination: { el: '.swiper-pagination' },
+        });
+
+        function initTimer() {
+            const timerEl = document.getElementById('timer');
+            const startAttr = timerEl.dataset.start || "2025-08-03T00:00:00";
+            const start = new Date(startAttr);
+            setInterval(() => {
+                const diff = new Date() - start;
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff / 3600000) % 24);
+                const m = Math.floor((diff / 60000) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+                const hh = String(h).padStart(2, '0');
+                const mm = String(m).padStart(2, '0');
+                const ss = String(s).padStart(2, '0');
+                timerEl.innerText = `${d} Days ${hh}:${mm}:${ss} — Since ${start.toISOString().slice(0,10)}`;
+            }, 1000);
+        }
+
+        function startFloating() {
+            const symbols = ['💌'];
+            setInterval(() => {
+                const el = document.createElement('div');
+                el.className = 'float-obj';
+                el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = Math.random() * 20 + 15 + 'px';
+                el.style.animationDuration = Math.random() * 4 + 5 + 's';
+                el.style.opacity = Math.random() * 0.7;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 8000);
+            }, 400);
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('bg-music');
+            audio.paused ? audio.play() : audio.pause();
+        }
+    </script>
+</body>
+</html>
